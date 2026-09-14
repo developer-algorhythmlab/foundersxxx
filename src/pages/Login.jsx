@@ -87,7 +87,10 @@ export default function Login({ onLogin }) {
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
             <Logo height={34} />
           </div>
-          <p style={{ ...styles.eyebrow, color: isFunder ? "#dc2626" : styles.eyebrow.color }}>
+          <p
+            className={isFunder ? "auth-alert" : undefined}
+            style={{ ...styles.eyebrow, color: isFunder ? "#dc2626" : styles.eyebrow.color }}
+          >
             {isFunder ? "Authorised access only" : "Welcome back"}
           </p>
           <h2 style={styles.formTitle}>{isFunder ? "Funder & Incubator Access" : "Sign in to FoundrX"}</h2>
