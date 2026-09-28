@@ -29,7 +29,7 @@ export function useInView(options = {}) {
 // Types out a headline made of segments; accent segments keep the gradient styling.
 // segments: [{ text: "...", accent?: true }]
 // start: when false, waits to begin typing (e.g. until scrolled into view)
-export function Typewriter({ segments, speed = 46, startDelay = 300, ariaLabel, style, start = true }) {
+export function Typewriter({ segments, speed = 46, startDelay = 300, ariaLabel, style, start = true, showCaret = true }) {
   const { reduceMotion } = useTheme();
   const full = segments.reduce((n, s) => n + s.text.length, 0);
   const [count, setCount] = useState(reduceMotion ? full : 0);
@@ -80,7 +80,7 @@ export function Typewriter({ segments, speed = 46, startDelay = 300, ariaLabel, 
             <span key={idx}>{txt}</span>
           );
         })}
-        {!done && <span className="type-caret blink" aria-hidden="true">&nbsp;</span>}
+        {showCaret && !done && <span className="type-caret blink" aria-hidden="true">&nbsp;</span>}
       </span>
     </span>
   );

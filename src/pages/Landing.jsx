@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis } from "recharts";
 import Logo from "../components/Logo.jsx";
 import LoadingOverlay from "../components/LoadingOverlay.jsx";
+import foundrVaultIcon from "../assets/foundrvault-target.png";
+import fundingReadinessIcon from "../assets/funding-readiness-chart.png";
 import { Typewriter, useInView, ScrollReveal, StatCounter, Floaties, Polygraph } from "../lib.jsx";
 import { useTheme } from "../theme.jsx";
 import {
@@ -18,6 +20,7 @@ import {
   TrendingUp,
   Check,
   RotateCw,
+  ChevronDown,
 } from "lucide-react";
 
 const PILLARS = [
@@ -64,10 +67,52 @@ const PILLARS = [
 ];
 
 const FEATURES = [
-  { icon: FolderLock, title: "FoundrVault", text: "A secure document vault with a live Compliance Readiness Index." },
-  { icon: TrendingUp, title: "Funding Readiness Score", text: "See exactly how ready you are for grants, blended finance, debt, or equity." },
-  { icon: ShieldCheck, title: "Credit repair workflows", text: "Clear actions to fix utilisation, disputes, and negative markers." },
-  { icon: FileDown, title: "One-click PDF reports", text: "Export any section — scores, cohorts, impact — as a branded PDF." },
+  {
+    icon: FolderLock,
+    iconImg: foundrVaultIcon,
+    title: "FoundrVault",
+    text: "A secure document vault with a live Compliance Readiness Index.",
+    more: [
+      "Bank-grade encryption for every CIPC, SARS & B-BBEE document you upload",
+      "Auto-flags expired or missing documents before they cost you a deal",
+      "Compliance Readiness Index updates the moment you add or fix a document",
+      "Generate shareable, read-only links for funders and auditors",
+    ],
+  },
+  {
+    icon: TrendingUp,
+    iconImg: fundingReadinessIcon,
+    title: "Funding Readiness Score",
+    text: "See exactly how ready you are for grants, blended finance, debt, or equity.",
+    more: [
+      "Blends credit health, compliance, and cash-flow signals into one score",
+      "Breaks readiness down by funding type: grant, blended, debt, equity",
+      "Surfaces the top 3 actions that move your score fastest",
+      "Recalculates in real time as you fix issues",
+    ],
+  },
+  {
+    icon: ShieldCheck,
+    title: "Credit repair workflows",
+    text: "Clear actions to fix utilisation, disputes, and negative markers.",
+    more: [
+      "Automatically flags high utilisation, judgements, and admin errors",
+      "Step-by-step guided fixes with an estimated score impact",
+      "Tracks director and business credit repair separately",
+      "Notifies you the moment a dispute is resolved",
+    ],
+  },
+  {
+    icon: FileDown,
+    title: "One-click PDF reports",
+    text: "Export any section — scores, cohorts, impact — as a branded PDF.",
+    more: [
+      "Branded, funder-ready PDF generated in one click",
+      "Bundles scores, cohort progress, and compliance status together",
+      "Built for board packs, funder updates, and ESG reporting",
+      "Keeps an export history so nothing gets lost in email threads",
+    ],
+  },
 ];
 
 const STATS = [
@@ -219,12 +264,36 @@ function TypingSectionHead({ segments, ariaLabel, sub }) {
   );
 }
 
-function FlipCard({ pillar }) {
+function FlipCard({ pillar, index = 0 }) {
   const [flipped, setFlipped] = useState(false);
+  const [auto, setAuto] = useState(false);
+  const { reduceMotion } = useTheme();
   const Icon = pillar.icon;
+
+  // Auto-rotate every 20s, staggered per card so they don't all flip in lockstep.
+  useEffect(() => {
+    if (reduceMotion) return;
+    const stagger = index * 3000;
+    let interval;
+    const start = setTimeout(() => {
+      setFlipped((f) => !f);
+      setAuto(true);
+      setTimeout(() => setAuto(false), 700);
+      interval = setInterval(() => {
+        setFlipped((f) => !f);
+        setAuto(true);
+        setTimeout(() => setAuto(false), 700);
+      }, 20000);
+    }, 20000 + stagger);
+    return () => {
+      clearTimeout(start);
+      clearInterval(interval);
+    };
+  }, [reduceMotion, index]);
+
   return (
     <div
-      className={`flip${flipped ? " is-flipped" : ""}`}
+      className={`flip${flipped ? " is-flipped" : ""}${auto ? " flip-auto" : ""}`}
       role="button"
       tabIndex={0}
       aria-label={`${pillar.title}. Activate to see what it does.`}
@@ -259,6 +328,65 @@ function FlipCard({ pillar }) {
   );
 }
 
+const BURST_DOTS = Array.from({ length: 10 });
+
+function FeatureCard({ feature }) {
+  const [open, setOpen] = useState(false);
+  const [burstKey, setBurstKey] = useState(0);
+  const Icon = feature.icon;
+
+  function toggle() {
+    setOpen((o) => {
+      const next = !o;
+      if (next) setBurstKey((k) => k + 1);
+      return next;
+    });
+  }
+
+  return (
+    <div
+      className={`card feature-card feature-card-expandable${open ? " is-open" : ""}`}
+      role="button"
+      tabIndex={0}
+      aria-expanded={open}
+      onClick={toggle}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggle();
+        }
+      }}
+    >
+      <span className={`feature-icon${feature.iconImg ? " feature-icon-plain" : ""}`}>
+        {feature.iconImg ? (
+          <img src={feature.iconImg} alt="" width={46} height={46} />
+        ) : (
+          <Icon size={20} />
+        )}
+        {open && (
+          <span className="icon-burst" key={burstKey} aria-hidden="true">
+            {BURST_DOTS.map((_, i) => (
+              <span className="burst-dot" style={{ "--i": i }} key={i} />
+            ))}
+          </span>
+        )}
+      </span>
+      <h3 style={{ fontSize: "1rem" }}>{feature.title}</h3>
+      <p>{feature.text}</p>
+      <span className="feature-more-hint">
+        <ChevronDown size={15} className="feature-chevron" /> {open ? "Show less" : "Learn more"}
+      </span>
+      <div className="feature-more">
+        <ul className="flip-points">
+          {feature.more.map((pt, i) => (
+            <li key={i}><Check size={14} /> <span>{pt}</span></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 export default function Landing() {
   const navigate = useNavigate();
   const { reduceMotion } = useTheme();
@@ -266,6 +394,7 @@ export default function Landing() {
   // Intro sequence: "intro" (video playing) -> "revealing" (site slides in) -> "done"
   const [phase, setPhase] = useState(reduceMotion ? "done" : "intro");
   const introVideoRef = useRef(null);
+  const [ctaRef, ctaInView] = useInView({ threshold: 0.4 });
 
   function getStarted() {
     setLoading(true);
@@ -381,8 +510,8 @@ export default function Landing() {
             <p>Four operational pillars that carry an SMME from day one to commercial supply chains.</p>
           </ScrollReveal>
           <ScrollReveal className="grid grid-2">
-            {PILLARS.map((p) => (
-              <FlipCard key={p.title} pillar={p} />
+            {PILLARS.map((p, i) => (
+              <FlipCard key={p.title} pillar={p} index={i} />
             ))}
           </ScrollReveal>
         </div>
@@ -399,13 +528,9 @@ export default function Landing() {
             ]}
             sub="No more juggling spreadsheets, bureau portals, and email threads."
           />
-          <ScrollReveal className="grid grid-4">
+          <ScrollReveal className="grid grid-4 feature-grid">
             {FEATURES.map((f) => (
-              <div key={f.title} className="card feature-card">
-                <span className="feature-icon"><f.icon size={20} /></span>
-                <h3 style={{ fontSize: "1rem" }}>{f.title}</h3>
-                <p>{f.text}</p>
-              </div>
+              <FeatureCard key={f.title} feature={f} />
             ))}
           </ScrollReveal>
         </div>
@@ -446,8 +571,8 @@ export default function Landing() {
             <p>Whether you're building a business or backing dozens of them.</p>
           </div>
           <ScrollReveal className="grid grid-2">
-            {AUDIENCES.map((a) => (
-              <FlipCard key={a.title} pillar={a} />
+            {AUDIENCES.map((a, i) => (
+              <FlipCard key={a.title} pillar={a} index={i} />
             ))}
           </ScrollReveal>
         </div>
@@ -456,14 +581,19 @@ export default function Landing() {
       {/* FINAL CTA */}
       <section className="land-section" style={{ paddingTop: 0 }}>
         <div className="land-container">
-          <div className="template-surface land-cta-band" style={{ position: "relative", overflow: "hidden" }}>
+          <div ref={ctaRef} className="template-surface land-cta-band" style={{ position: "relative", overflow: "hidden" }}>
             <Floaties />
             <div style={{ position: "relative", zIndex: 2 }}>
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
                 <Logo height={30} variant="light" />
               </div>
               <h2 style={{ color: "#fff", fontSize: "clamp(1.7rem,3.6vw,2.4rem)", marginBottom: 12 }}>
-                Ready to grow with FoundrX?
+                <Typewriter
+                  start={ctaInView}
+                  showCaret={false}
+                  ariaLabel="Ready to grow with FoundrX?"
+                  segments={[{ text: "Ready to grow with FoundrX?" }]}
+                />
               </h2>
               <p style={{ color: "rgba(255,255,255,0.75)", maxWidth: 520, margin: "0 auto 26px", lineHeight: 1.6 }}>
                 Register your business in minutes and get your funding-readiness score today.
