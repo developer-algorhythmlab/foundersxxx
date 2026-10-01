@@ -28,6 +28,7 @@ import LifecycleFlow from "../components/LifecycleFlow.jsx";
 import StageProgress from "../components/StageProgress.jsx";
 import { AnimatedBar, CountUp } from "../lib.jsx";
 import { useTheme } from "../theme.jsx";
+import { useProgress } from "../progress.jsx";
 import { SectionHeader } from "../components/ExportButton.jsx";
 import { Sparkles, BarChart3, PieChart as PieIcon } from "lucide-react";
 
@@ -35,7 +36,10 @@ export default function Overview({ user }) {
   const { colors } = useTheme();
   const businessName = user?.business || company.name || "Your business";
   const metaParts = [company.sector, company.province, company.cipc ? `CIPC ${company.cipc}` : null].filter(Boolean);
-  const stageName = stageLabels[company.stage - 1];
+  const progress = useProgress();
+  const stage = progress.stage;
+  const stageName = stageLabels[stage - 1];
+  const remaining = progress.steps - progress.stepsDone;
   const pieColors = [colors.c1, colors.c2, colors.c3, colors.c4];
 
   const trendBlocks = [{ type: "table", head: [["Month", "Personal", "Business"]], body: scoreTrend.map((r) => [r.month, r.personal, r.business]), striped: true }];
@@ -126,9 +130,12 @@ export default function Overview({ user }) {
         <div className="card pad">
           <h3 className="section-title">Your growth stage</h3>
           <p className="muted" style={{ fontSize: "0.82rem", marginTop: 0, marginBottom: 28 }}>
-            You're at <strong>{stageName}</strong>. Complete the steps in FoundrVault and Credit Health to advance to the next stage.
+            You're at <strong>{stageName}</strong>.{" "}
+            {stage >= 2
+              ? "Nice work — your required documents and credit actions are in place."
+              : `${remaining} step${remaining === 1 ? "" : "s"} left in FoundrVault and Credit Health to reach ${stageLabels[1]}.`}
           </p>
-          <StageProgress current={company.stage} />
+          <StageProgress current={stage} />
         </div>
       </div>
 

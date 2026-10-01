@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { documents as seed } from "../data/appData";
+import { useProgress } from "../progress.jsx";
 import { SectionHeader } from "../components/ExportButton.jsx";
 import {
   CheckCircle2,
@@ -16,7 +15,7 @@ const STATUS = {
 };
 
 export default function FoundrVault() {
-  const [docs, setDocs] = useState(seed);
+  const { docs, setDocs } = useProgress();
 
   function upload(id) {
     setDocs((d) => d.map((x) => (x.id === id ? { ...x, status: "verified" } : x)));

@@ -107,7 +107,6 @@ export default function DashboardLayout({ user, onLogout }) {
             </button>
             <div style={{ minWidth: 0 }}>
               <p className="eyebrow" style={styles.eyebrow}>
-                <span className="platform-dot" />
                 FoundrX Platform
               </p>
               <h2 style={styles.pageTitle}>{TITLES[loc.pathname] || "Overview"}</h2>

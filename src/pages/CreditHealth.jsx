@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   ResponsiveContainer,
   PieChart,
@@ -18,7 +17,8 @@ import {
   Radar,
   Legend,
 } from "recharts";
-import { credit, repairPlan, utilisation, debtComposition, radarFactors } from "../data/appData";
+import { useProgress } from "../progress.jsx";
+import { credit, utilisation, debtComposition, radarFactors } from "../data/appData";
 import ScoreGauge from "../components/ScoreGauge.jsx";
 import { AnimatedBar, CountUp } from "../lib.jsx";
 import { useTheme } from "../theme.jsx";
@@ -69,11 +69,8 @@ function CreditCard({ data }) {
 const PRIORITY = ["Critical", "Critical", "High", "High"];
 
 function ImproveCard({ fixes, ratio, limit, healthyMax }) {
-  const [done, setDone] = useState({});
   const hasData = limit > 0;
   const critical = hasData && ratio > healthyMax;
-  const doneCount = fixes.filter((_, i) => done[i]).length;
-  const pct = Math.round((doneCount / fixes.length) * 100);
   const accent = critical ? "var(--bad)" : "var(--good)";
 
   return (
@@ -82,7 +79,6 @@ function ImproveCard({ fixes, ratio, limit, healthyMax }) {
         <Wrench size={16} color={accent} />
         <strong style={{ fontSize: "0.9rem" }}>How to improve it</strong>
         {critical && <span className="critical-badge">Critical — act now</span>}
-        <span className="muted" style={{ marginLeft: "auto", fontSize: "0.75rem", fontWeight: 700 }}>{doneCount}/{fixes.length} done</span>
       </div>
 
       {!hasData && (
@@ -92,31 +88,17 @@ function ImproveCard({ fixes, ratio, limit, healthyMax }) {
       )}
       {critical && (
         <p style={{ margin: "0 0 10px", fontSize: "0.8rem", fontWeight: 600, color: "var(--bad)" }}>
-          You're at {ratio}% — above the {healthyMax}% healthy ceiling. Funders will flag this. Tick each step as you complete it.
+          You're at {ratio}% — above the {healthyMax}% healthy ceiling. Funders will flag this.
         </p>
       )}
 
-      <div style={{ height: 6, borderRadius: 999, background: "var(--line)", overflow: "hidden", marginBottom: 12 }}>
-        <div style={{ width: `${pct}%`, height: "100%", background: "var(--good)", transition: "width 0.4s ease" }} />
-      </div>
-
       <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gap: 8 }}>
         {fixes.map((t, i) => {
-          const on = !!done[i];
           const tag = PRIORITY[i] || "High";
           return (
-            <li key={i}>
-              <button
-                type="button"
-                onClick={() => setDone((d) => ({ ...d, [i]: !d[i] }))}
-                aria-pressed={on}
-                className="fix-item"
-                style={{ opacity: on ? 0.6 : 1 }}
-              >
-                {on ? <CheckCircle2 size={18} color="var(--good)" style={{ flex: "0 0 auto" }} /> : <Circle size={18} color={critical ? "var(--bad)" : "var(--muted)"} style={{ flex: "0 0 auto" }} />}
-                <span style={{ flex: 1, textAlign: "left", fontSize: "0.83rem", lineHeight: 1.5, color: "var(--ink)", textDecoration: on ? "line-through" : "none" }}>{t}</span>
-                <span className={`fix-tag ${tag === "Critical" ? "fix-tag-critical" : ""}`}>{tag}</span>
-              </button>
+            <li key={i} className="fix-item">
+              <span style={{ flex: 1, textAlign: "left", fontSize: "0.83rem", lineHeight: 1.5, color: "var(--ink)" }}>{t}</span>
+              <span className={`fix-tag ${tag === "Critical" ? "fix-tag-critical" : ""}`}>{tag}</span>
             </li>
           );
         })}
@@ -127,7 +109,7 @@ function ImproveCard({ fixes, ratio, limit, healthyMax }) {
 
 export default function CreditHealth() {
   const { colors } = useTheme();
-  const [plan, setPlan] = useState(repairPlan);
+  const { plan, setPlan } = useProgress();
 
   function toggle(id) {
     setPlan((p) => p.map((r) => (r.id === id ? { ...r, done: !r.done } : r)));
