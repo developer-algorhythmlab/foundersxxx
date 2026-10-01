@@ -1277,3 +1277,17 @@ html[data-a11y-motion="reduce"] .site-reveal {
   .role-toggle::before, .role-toggle button { transition: none; }
   .role-fade { animation: none; }
 }
+
+/* Flip-card back: optional illustration beside the points */
+.flip-back-body { display: flex; align-items: center; gap: 16px; height: 100%; }
+.flip-back-text { flex: 1 1 auto; min-width: 0; }
+.flip-back-img {
+  flex: 0 0 38%;
+  max-width: 38%;
+  max-height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+@media (max-width: 520px) {
+  .flip-back-img { display: none; }
+}

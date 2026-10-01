@@ -1,29 +1,22 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Logo from "../components/Logo.jsx";
+import PasswordInput from "../components/PasswordInput.jsx";
 import { Floaties, Typewriter } from "../lib.jsx";
-import { ArrowLeft, ArrowRight, ShieldCheck, TrendingUp, Users, Eye, ShieldAlert, Scale } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const SMME_COPY = {
-  title: "One platform to formalise, fund, and scale South African SMMEs.",
-  lead: "FoundrX pulls registration, credit, compliance, and cohort tracking into a single view — for founders and the partners backing them.",
-  eyebrow: "Welcome back",
-  features: [
-    [ShieldCheck, "FoundrVault"],
-    [TrendingUp, "Dual credit"],
-    [Users, "Cohort tracking"],
-  ],
+  title: "Formalise, fund and scale your business.",
+  lead: "Registration, credit and compliance in one place.",
+  eyebrow: "SMME portal",
+  heading: "Sign in to FoundrX",
 };
 
 const FUNDER_COPY = {
-  title: "Every applicant. Every number. Nothing hidden from you.",
-  lead: "You decide who gets funded. FoundrX puts full credit exposure, compliance gaps, and repayment risk in front of you before you ever sign.",
-  eyebrow: "Due diligence starts now",
-  features: [
-    [Eye, "Total visibility"],
-    [ShieldAlert, "Risk exposure"],
-    [Scale, "The final call is yours"],
-  ],
+  title: "Clear insight into every applicant.",
+  lead: "Credit exposure, compliance and repayment risk in one view.",
+  eyebrow: "Funder & incubator portal",
+  heading: "Partner sign in",
 };
 
 const STRENGTH_META = [
@@ -86,23 +79,10 @@ export default function Login({ onLogin }) {
           <Typewriter key={role} ariaLabel={copy.title} segments={[{ text: copy.title }]} />
         </h1>
         <p key={`l-${role}`} className="funder-lead role-fade" style={styles.lead}>{copy.lead}</p>
-        <ul key={`f-${role}`} className="role-fade" style={styles.featureRow}>
-          {copy.features.map(([Icon, t]) => (
-            <li key={t} style={styles.featureChip}>
-              <span className="funder-feature-icon" style={styles.featureIcon}>
-                <Icon size={15} />
-              </span>
-              {t}
-            </li>
-          ))}
-        </ul>
       </div>
 
       <div style={styles.floatCard}>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
-          <Logo height={30} />
-        </div>
-        <h2 key={role} className="role-fade" style={{ ...styles.formTitle, marginTop: 12 }}>{isFunder ? "Funder & Incubator Access" : "Sign in to FoundrX"}</h2>
+        <h2 key={role} className="role-fade" style={styles.formTitle}>{copy.heading}</h2>
 
         <div
           className={`role-toggle${isFunder ? " danger" : ""}`}
@@ -130,8 +110,7 @@ export default function Login({ onLogin }) {
           </label>
           <label style={styles.label}>
             Password
-            <input
-              type="password"
+            <PasswordInput
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={styles.input}
@@ -169,14 +148,12 @@ export default function Login({ onLogin }) {
               background: isFunder ? "linear-gradient(120deg, #450a0a 0%, #7f1d1d 55%, #b91c1c 100%)" : undefined,
             }}
           >
-            {isFunder ? "Enter — proceed with scrutiny" : "Sign in"} <ArrowRight size={18} />
+            Sign in <ArrowRight size={18} />
           </button>
         </form>
 
         <p key={role} className="role-fade" style={styles.demoNote}>
-          {isFunder
-            ? "Demo mode — any credentials work. Every application from here will be laid bare."
-            : "Demo mode — any credentials work."}{" "}
+          Demo mode — any credentials work.{" "}
           New here?{" "}
           <Link to="/signup" style={styles.link}>
             Register your business

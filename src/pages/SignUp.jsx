@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Logo from "../components/Logo.jsx";
 import LoadingOverlay from "../components/LoadingOverlay.jsx";
+import PasswordInput from "../components/PasswordInput.jsx";
 import { Floaties, Typewriter } from "../lib.jsx";
 import { ArrowRight, Building2, CheckCircle2, AlertTriangle, X } from "lucide-react";
 
@@ -150,7 +151,7 @@ export default function SignUp({ onSignup }) {
               <input type="email" value={form.email} onChange={set("email")} placeholder="you@business.co.za" style={{ ...styles.input, ...(errors.email ? styles.inputError : {}) }} />
             </Field>
             <Field label="Password" error={errors.password}>
-              <input type="password" value={form.password} onChange={set("password")} placeholder="Create a password" style={{ ...styles.input, ...(errors.password ? styles.inputError : {}) }} />
+              <PasswordInput value={form.password} onChange={set("password")} placeholder="Create a password" style={{ ...styles.input, ...(errors.password ? styles.inputError : {}) }} />
             </Field>
 
             {role === "smme" && (

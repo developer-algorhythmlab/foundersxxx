@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Logo from "../components/Logo.jsx";
 import LoadingOverlay from "../components/LoadingOverlay.jsx";
 import foundrVaultIcon from "../assets/foundrvault-target.png";
+import foundrLabsImage from "../assets/foundr-labs-cohort.jpg";
 import fundingReadinessIcon from "../assets/funding-readiness-chart.png";
 import { Typewriter, useInView, ScrollReveal, StatCounter, Floaties } from "../lib.jsx";
 import { useTheme } from "../theme.jsx";
@@ -125,6 +126,7 @@ const AUDIENCES = [
   {
     icon: TrendingUp,
     title: "For SMMEs",
+    image: foundrLabsImage,
     text: "Formalise faster, understand your credit, fix what's holding you back, and get investment-ready — with clear next steps at every stage.",
     points: [
       "Guided CIPC, SARS & B-BBEE formalisation",
@@ -235,13 +237,18 @@ function FlipCard({ pillar, index = 0 }) {
         </div>
         {/* Back */}
         <div className="flip-face flip-back">
-          <div className="flip-back-title">What it does</div>
-          <h3 style={{ fontSize: "1.05rem", color: "var(--ink)", marginBottom: 10 }}>{pillar.title}</h3>
-          <ul className="flip-points">
-            {pillar.points.map((pt, i) => (
-              <li key={i}><Check size={15} /> <span>{pt}</span></li>
-            ))}
-          </ul>
+          <div className="flip-back-body">
+            <div className="flip-back-text">
+              <div className="flip-back-title">What it does</div>
+              <h3 style={{ fontSize: "1.05rem", color: "var(--ink)", marginBottom: 10 }}>{pillar.title}</h3>
+              <ul className="flip-points">
+                {pillar.points.map((pt, i) => (
+                  <li key={i}><Check size={15} /> <span>{pt}</span></li>
+                ))}
+              </ul>
+            </div>
+            {pillar.image && <img className="flip-back-img" src={pillar.image} alt="" loading="lazy" />}
+          </div>
         </div>
       </div>
     </div>
