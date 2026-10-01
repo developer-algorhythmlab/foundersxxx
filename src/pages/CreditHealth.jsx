@@ -66,6 +66,65 @@ function CreditCard({ data }) {
   );
 }
 
+const PRIORITY = ["Critical", "Critical", "High", "High"];
+
+function ImproveCard({ fixes, ratio, limit, healthyMax }) {
+  const [done, setDone] = useState({});
+  const hasData = limit > 0;
+  const critical = hasData && ratio > healthyMax;
+  const doneCount = fixes.filter((_, i) => done[i]).length;
+  const pct = Math.round((doneCount / fixes.length) * 100);
+  const accent = critical ? "var(--bad)" : "var(--good)";
+
+  return (
+    <div className={critical ? "critical-card" : ""} style={{ padding: 16, borderRadius: 14, border: `1px solid ${critical ? "var(--bad)" : "var(--line-strong)"}`, background: "var(--panel-tint)" }}>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10, flexWrap: "wrap" }}>
+        <Wrench size={16} color={accent} />
+        <strong style={{ fontSize: "0.9rem" }}>How to improve it</strong>
+        {critical && <span className="critical-badge">Critical — act now</span>}
+        <span className="muted" style={{ marginLeft: "auto", fontSize: "0.75rem", fontWeight: 700 }}>{doneCount}/{fixes.length} done</span>
+      </div>
+
+      {!hasData && (
+        <div role="alert" style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10, fontSize: "0.8rem", fontWeight: 600, color: "var(--warn)" }}>
+          <AlertTriangle size={14} /> Information missing — add your credit limit and balance to see your live utilisation.
+        </div>
+      )}
+      {critical && (
+        <p style={{ margin: "0 0 10px", fontSize: "0.8rem", fontWeight: 600, color: "var(--bad)" }}>
+          You're at {ratio}% — above the {healthyMax}% healthy ceiling. Funders will flag this. Tick each step as you complete it.
+        </p>
+      )}
+
+      <div style={{ height: 6, borderRadius: 999, background: "var(--line)", overflow: "hidden", marginBottom: 12 }}>
+        <div style={{ width: `${pct}%`, height: "100%", background: "var(--good)", transition: "width 0.4s ease" }} />
+      </div>
+
+      <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gap: 8 }}>
+        {fixes.map((t, i) => {
+          const on = !!done[i];
+          const tag = PRIORITY[i] || "High";
+          return (
+            <li key={i}>
+              <button
+                type="button"
+                onClick={() => setDone((d) => ({ ...d, [i]: !d[i] }))}
+                aria-pressed={on}
+                className="fix-item"
+                style={{ opacity: on ? 0.6 : 1 }}
+              >
+                {on ? <CheckCircle2 size={18} color="var(--good)" style={{ flex: "0 0 auto" }} /> : <Circle size={18} color={critical ? "var(--bad)" : "var(--muted)"} style={{ flex: "0 0 auto" }} />}
+                <span style={{ flex: 1, textAlign: "left", fontSize: "0.83rem", lineHeight: 1.5, color: "var(--ink)", textDecoration: on ? "line-through" : "none" }}>{t}</span>
+                <span className={`fix-tag ${tag === "Critical" ? "fix-tag-critical" : ""}`}>{tag}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 export default function CreditHealth() {
   const { colors } = useTheme();
   const [plan, setPlan] = useState(repairPlan);
@@ -194,17 +253,7 @@ export default function CreditHealth() {
               ))}
             </ul>
           </div>
-          <div style={{ padding: 16, borderRadius: 14, border: "1px solid var(--line-strong)", background: "var(--panel-tint)" }}>
-            <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
-              <Wrench size={16} color="var(--good)" />
-              <strong style={{ fontSize: "0.9rem" }}>How to improve it</strong>
-            </div>
-            <ul style={{ margin: 0, paddingLeft: 18, display: "grid", gap: 8 }}>
-              {utilisation.howToFix.map((t, i) => (
-                <li key={i} style={{ fontSize: "0.83rem", lineHeight: 1.5, color: "var(--ink)" }}>{t}</li>
-              ))}
-            </ul>
-          </div>
+          <ImproveCard fixes={utilisation.howToFix} ratio={utilisation.ratio} limit={utilisation.limit} healthyMax={utilisation.healthyMax} />
         </div>
       </div>
 

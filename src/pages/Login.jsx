@@ -81,12 +81,12 @@ export default function Login({ onLogin }) {
 
       <div style={styles.header}>
         <Logo height={36} variant="light" />
-        <p className="funder-eyebrow" style={styles.modeEyebrow}>{copy.eyebrow}</p>
+        <p key={`e-${role}`} className="funder-eyebrow role-fade" style={styles.modeEyebrow}>{copy.eyebrow}</p>
         <h1 style={styles.headline}>
           <Typewriter key={role} ariaLabel={copy.title} segments={[{ text: copy.title }]} />
         </h1>
-        <p className="funder-lead" style={styles.lead}>{copy.lead}</p>
-        <ul style={styles.featureRow}>
+        <p key={`l-${role}`} className="funder-lead role-fade" style={styles.lead}>{copy.lead}</p>
+        <ul key={`f-${role}`} className="role-fade" style={styles.featureRow}>
           {copy.features.map(([Icon, t]) => (
             <li key={t} style={styles.featureChip}>
               <span className="funder-feature-icon" style={styles.featureIcon}>
@@ -102,21 +102,17 @@ export default function Login({ onLogin }) {
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
           <Logo height={30} />
         </div>
-        <h2 style={{ ...styles.formTitle, marginTop: 12 }}>{isFunder ? "Funder & Incubator Access" : "Sign in to FoundrX"}</h2>
+        <h2 key={role} className="role-fade" style={{ ...styles.formTitle, marginTop: 12 }}>{isFunder ? "Funder & Incubator Access" : "Sign in to FoundrX"}</h2>
 
-        <div style={styles.roleToggle}>
-          <button
-            type="button"
-            onClick={() => setRole("smme")}
-            style={role === "smme" ? styles.roleActive : styles.roleBtn}
-          >
+        <div
+          className={`role-toggle${isFunder ? " danger" : ""}`}
+          data-role={role}
+          style={{ "--toggle-pill": "#fff", "--toggle-tint": CARD.panelTint, "--toggle-muted": CARD.muted, "--toggle-active": CARD.violetDeep }}
+        >
+          <button type="button" aria-pressed={!isFunder} onClick={() => setRole("smme")}>
             I'm an SMME
           </button>
-          <button
-            type="button"
-            onClick={() => setRole("partner")}
-            style={role === "partner" ? styles.roleActiveDanger : styles.roleBtn}
-          >
+          <button type="button" aria-pressed={isFunder} onClick={() => setRole("partner")}>
             Funder / Incubator
           </button>
         </div>
@@ -177,7 +173,7 @@ export default function Login({ onLogin }) {
           </button>
         </form>
 
-        <p style={styles.demoNote}>
+        <p key={role} className="role-fade" style={styles.demoNote}>
           {isFunder
             ? "Demo mode — any credentials work. Every application from here will be laid bare."
             : "Demo mode — any credentials work."}{" "}
@@ -304,47 +300,6 @@ const styles = {
     padding: 32,
   },
   formTitle: { textAlign: "center", fontSize: "1.4rem", marginBottom: 20, color: CARD.ink },
-  roleToggle: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: 6,
-    background: CARD.panelTint,
-    padding: 5,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  roleBtn: {
-    border: "none",
-    background: "transparent",
-    padding: "9px 8px",
-    borderRadius: 8,
-    fontWeight: 600,
-    fontSize: "0.85rem",
-    color: CARD.muted,
-    cursor: "pointer",
-  },
-  roleActive: {
-    border: "none",
-    background: "#fff",
-    padding: "9px 8px",
-    borderRadius: 8,
-    fontWeight: 700,
-    fontSize: "0.85rem",
-    color: CARD.violetDeep,
-    boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-    cursor: "pointer",
-  },
-  roleActiveDanger: {
-    border: "none",
-    background: "#fff",
-    padding: "9px 8px",
-    borderRadius: 8,
-    fontWeight: 700,
-    fontSize: "0.85rem",
-    color: "#b91c1c",
-    boxShadow: "0 0 0 1px rgba(220,38,38,0.35), 0 1px 2px rgba(0,0,0,0.08)",
-    cursor: "pointer",
-  },
   formError: {
     background: "rgba(220,38,38,0.08)",
     border: "1px solid rgba(220,38,38,0.25)",

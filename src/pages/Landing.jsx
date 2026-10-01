@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis } from "recharts";
 import Logo from "../components/Logo.jsx";
 import LoadingOverlay from "../components/LoadingOverlay.jsx";
 import foundrVaultIcon from "../assets/foundrvault-target.png";
 import fundingReadinessIcon from "../assets/funding-readiness-chart.png";
-import { Typewriter, useInView, ScrollReveal, StatCounter, Floaties, Polygraph } from "../lib.jsx";
+import { Typewriter, useInView, ScrollReveal, StatCounter, Floaties } from "../lib.jsx";
 import { useTheme } from "../theme.jsx";
 import {
   ArrowRight,
@@ -168,85 +167,6 @@ function StatsBand() {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function LiveLineChart() {
-  const { colors, reduceMotion } = useTheme();
-  const [data, setData] = useState(() => {
-    const a = [];
-    let v = 55;
-    for (let i = 0; i < 16; i++) {
-      v = Math.max(25, Math.min(95, v + (Math.random() * 16 - 8)));
-      a.push({ t: i, v: Math.round(v) });
-    }
-    return a;
-  });
-
-  useEffect(() => {
-    if (reduceMotion) return;
-    const id = setInterval(() => {
-      setData((d) => {
-        const last = d[d.length - 1];
-        const nv = Math.max(25, Math.min(95, last.v + (Math.random() * 18 - 8)));
-        return d.slice(1).concat({ t: last.t + 1, v: Math.round(nv) });
-      });
-    }, 1200);
-    return () => clearInterval(id);
-  }, [reduceMotion]);
-
-  return (
-    <div style={{ height: 200, marginTop: 10 }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 6, right: 6, left: 6, bottom: 0 }}>
-          <defs>
-            <linearGradient id="liveFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={colors.c2} stopOpacity={0.5} />
-              <stop offset="100%" stopColor={colors.c2} stopOpacity={0.04} />
-            </linearGradient>
-          </defs>
-          <YAxis hide domain={[0, 110]} />
-          <XAxis hide dataKey="t" />
-          <Area
-            type="monotone"
-            dataKey="v"
-            stroke={colors.c1}
-            strokeWidth={3}
-            fill="url(#liveFill)"
-            isAnimationActive={!reduceMotion}
-            animationDuration={800}
-            dot={false}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
-function AdvicePanel() {
-  const tips = [
-    "Pay your revolving balance below 30% before your statement date — the fastest score lift.",
-    "Clear the two overdue supplier accounts to remove your biggest negative marker.",
-    "File your outstanding SARS return to keep your compliance index green.",
-    "Automate minimum payments so a late mark never dents your history.",
-  ];
-  const [i, setI] = useState(0);
-  return (
-    <div className="card feature-card">
-      <h3 style={{ marginBottom: 6 }}>AI credit advice</h3>
-      <p className="muted" style={{ marginTop: 0, fontSize: "0.9rem" }}>
-        Tap for live guidance from your FoundrX advisor.
-      </p>
-      <button
-        className="btn btn-primary"
-        style={{ marginTop: 14, marginBottom: 4 }}
-        onClick={() => setI((x) => (x + 1) % tips.length)}
-      >
-        <Sparkles size={16} /> Advice
-      </button>
-      <Polygraph />
-      <p className="advice-tip">{tips[i]}</p>
     </div>
   );
 }
@@ -532,26 +452,6 @@ export default function Landing() {
             {FEATURES.map((f) => (
               <FeatureCard key={f.title} feature={f} />
             ))}
-          </ScrollReveal>
-        </div>
-      </section>
-
-      {/* LIVE GRAPH + ADVICE */}
-      <section className="land-section" style={{ paddingTop: 0 }}>
-        <div className="land-container">
-          <div className="land-section-head">
-            <h2>Your data, <span className="accent">alive</span></h2>
-            <p>Watch your metrics move in real time — and get instant guidance.</p>
-          </div>
-          <ScrollReveal className="grid grid-2">
-            <div className="card feature-card">
-              <h3 style={{ marginBottom: 6 }}>Live activity</h3>
-              <p className="muted" style={{ marginTop: 0, fontSize: "0.9rem" }}>
-                Cohort momentum, updating second by second.
-              </p>
-              <LiveLineChart />
-            </div>
-            <AdvicePanel />
           </ScrollReveal>
         </div>
       </section>

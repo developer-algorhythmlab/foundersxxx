@@ -106,7 +106,8 @@ export default function DashboardLayout({ user, onLogout }) {
               <Menu size={20} />
             </button>
             <div style={{ minWidth: 0 }}>
-              <p className="eyebrow" style={{ margin: 0 }}>
+              <p className="eyebrow" style={styles.eyebrow}>
+                <span className="platform-dot" />
                 FoundrX Platform
               </p>
               <h2 style={styles.pageTitle}>{TITLES[loc.pathname] || "Overview"}</h2>
@@ -206,6 +207,27 @@ const styles = {
     color: "var(--violet-deep)",
     placeItems: "center",
   },
-  pageTitle: { fontSize: "1.2rem", lineHeight: 1.1 },
+  eyebrow: {
+    margin: 0,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "3px 10px",
+    borderRadius: 999,
+    background: "var(--panel-tint)",
+    border: "1px solid var(--line)",
+    letterSpacing: "0.14em",
+    fontSize: "0.68rem",
+  },
+  pageTitle: {
+    fontSize: "1.5rem",
+    lineHeight: 1.15,
+    marginTop: 4,
+    background: "var(--grad-brand)",
+    WebkitBackgroundClip: "text",
+    backgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    width: "fit-content",
+  },
   content: { padding: "24px", maxWidth: 1180, width: "100%", margin: "0 auto" },
 };

@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import Logo from "../components/Logo.jsx";
 import LoadingOverlay from "../components/LoadingOverlay.jsx";
 import { Floaties, Typewriter } from "../lib.jsx";
-import { ArrowRight, Building2, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Building2, CheckCircle2, AlertTriangle, X } from "lucide-react";
 
 const SECTORS = ["Manufacturing", "Retail & Trade", "Services", "Agriculture", "Technology", "Construction", "Other"];
 const PROVINCES = [
@@ -26,8 +26,28 @@ export default function SignUp({ onSignup }) {
   const [loading, setLoading] = useState(false);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
+  const [errors, setErrors] = useState({});
+  const [showAlert, setShowAlert] = useState(false);
+
+  function validate() {
+    const orgLabel = role === "smme" ? "Business name" : "Organisation name";
+    const errs = {};
+    if (!form.business.trim()) errs.business = `${orgLabel} is missing`;
+    if (!form.name.trim()) errs.name = "Your full name is missing";
+    if (!form.email.trim()) errs.email = "Work email is missing";
+    else if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) errs.email = "Enter a valid email address";
+    if (!form.password) errs.password = "Password is missing";
+    return errs;
+  }
+
   function submit(e) {
     e.preventDefault();
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length) {
+      setShowAlert(true);
+      return;
+    }
     setLoading(true);
   }
 
@@ -45,6 +65,26 @@ export default function SignUp({ onSignup }) {
     <div className="login-wrap">
       {loading && (
         <LoadingOverlay message="Please wait" subtext="Creating your account & setting up your dashboard…" />
+      )}
+      {showAlert && (
+        <div style={styles.scrim} onClick={() => setShowAlert(false)} role="presentation">
+          <div style={styles.modal} role="alertdialog" aria-modal="true" aria-labelledby="missing-title" onClick={(e) => e.stopPropagation()}>
+            <button type="button" onClick={() => setShowAlert(false)} style={styles.modalClose} aria-label="Close">
+              <X size={18} />
+            </button>
+            <div style={styles.modalIcon}><AlertTriangle size={26} /></div>
+            <h3 id="missing-title" style={{ margin: "12px 0 6px", fontSize: "1.2rem" }}>Information missing</h3>
+            <p style={{ margin: 0, color: "var(--muted)", fontSize: "0.9rem", lineHeight: 1.5 }}>
+              Please complete the following before we can move you on to the next step of signing up your business:
+            </p>
+            <ul style={{ margin: "14px 0 20px", paddingLeft: 20, fontSize: "0.9rem", lineHeight: 1.7, color: "var(--ink)" }}>
+              {Object.values(errors).map((m) => <li key={m}>{m}</li>)}
+            </ul>
+            <button type="button" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={() => setShowAlert(false)}>
+              Got it, let me fix this
+            </button>
+          </div>
+        </div>
       )}
       {/* Brand panel — new colour template */}
       <aside className="login-brand template-surface" style={{ position: "relative", overflow: "hidden", padding: "48px 56px", display: "flex", alignItems: "center" }}>
@@ -87,34 +127,34 @@ export default function SignUp({ onSignup }) {
           <h2 style={{ textAlign: "center", fontSize: "1.5rem", marginBottom: 20 }}>Register your business</h2>
 
           {/* Account type */}
-          <div style={styles.roleToggle}>
-            <button type="button" onClick={() => setRole("smme")} style={role === "smme" ? styles.roleActive : styles.roleBtn}>
+          <div className="role-toggle" data-role={role}>
+            <button type="button" aria-pressed={role === "smme"} onClick={() => setRole("smme")}>
               I'm an SMME
             </button>
-            <button type="button" onClick={() => setRole("partner")} style={role === "partner" ? styles.roleActive : styles.roleBtn}>
+            <button type="button" aria-pressed={role === "partner"} onClick={() => setRole("partner")}>
               Funder / Incubator
             </button>
           </div>
 
-          <form onSubmit={submit}>
-            <Field label={role === "smme" ? "Business name" : "Organisation name"}>
+          <form onSubmit={submit} noValidate>
+            <Field key={`b-${role}`} fade label={role === "smme" ? "Business name" : "Organisation name"} error={errors.business}>
               <div style={{ position: "relative" }}>
                 <Building2 size={16} style={styles.inputIcon} />
-                <input required value={form.business} onChange={set("business")} placeholder="e.g. Acme Trading (Pty) Ltd" style={{ ...styles.input, paddingLeft: 38 }} />
+                <input value={form.business} onChange={set("business")} placeholder="e.g. Acme Trading (Pty) Ltd" style={{ ...styles.input, paddingLeft: 38, ...(errors.business ? styles.inputError : {}) }} />
               </div>
             </Field>
-            <Field label="Your full name">
-              <input required value={form.name} onChange={set("name")} placeholder="Jane Dlamini" style={styles.input} />
+            <Field label="Your full name" error={errors.name}>
+              <input value={form.name} onChange={set("name")} placeholder="Jane Dlamini" style={{ ...styles.input, ...(errors.name ? styles.inputError : {}) }} />
             </Field>
-            <Field label="Work email">
-              <input required type="email" value={form.email} onChange={set("email")} placeholder="you@business.co.za" style={styles.input} />
+            <Field label="Work email" error={errors.email}>
+              <input type="email" value={form.email} onChange={set("email")} placeholder="you@business.co.za" style={{ ...styles.input, ...(errors.email ? styles.inputError : {}) }} />
             </Field>
-            <Field label="Password">
-              <input required type="password" value={form.password} onChange={set("password")} placeholder="Create a password" style={styles.input} />
+            <Field label="Password" error={errors.password}>
+              <input type="password" value={form.password} onChange={set("password")} placeholder="Create a password" style={{ ...styles.input, ...(errors.password ? styles.inputError : {}) }} />
             </Field>
 
             {role === "smme" && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="role-fade" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <Field label="Sector">
                   <select value={form.sector} onChange={set("sector")} style={styles.input}>
                     {SECTORS.map((s) => <option key={s}>{s}</option>)}
@@ -142,20 +182,27 @@ export default function SignUp({ onSignup }) {
   );
 }
 
-function Field({ label, children }) {
+function Field({ label, error, fade, children }) {
   return (
-    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 600, color: "var(--ink)", marginBottom: 14 }}>
+    <label className={fade ? "role-fade" : undefined} style={{ display: "block", fontSize: "0.82rem", fontWeight: 600, color: "var(--ink)", marginBottom: 14 }}>
       {label}
       <div style={{ marginTop: 6 }}>{children}</div>
+      {error && (
+        <div role="alert" style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, color: "#dc2626", fontSize: "0.78rem", fontWeight: 600 }}>
+          <AlertTriangle size={14} /> {error}
+        </div>
+      )}
     </label>
   );
 }
 
 const styles = {
-  roleToggle: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, background: "var(--panel-tint)", padding: 5, borderRadius: 12, marginBottom: 20 },
-  roleBtn: { border: "none", background: "transparent", padding: "9px 8px", borderRadius: 8, fontWeight: 600, fontSize: "0.85rem", color: "var(--muted)", cursor: "pointer" },
-  roleActive: { border: "none", background: "var(--surface)", padding: "9px 8px", borderRadius: 8, fontWeight: 700, fontSize: "0.85rem", color: "var(--violet-deep)", boxShadow: "var(--shadow-sm)", cursor: "pointer" },
   input: { display: "block", width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line-strong)", fontSize: "0.95rem", fontFamily: "inherit", outline: "none", background: "var(--surface)", color: "var(--ink)" },
+  inputError: { borderColor: "#dc2626", boxShadow: "0 0 0 3px rgba(220,38,38,0.12)" },
+  scrim: { position: "fixed", inset: 0, zIndex: 1000, background: "rgba(15,10,30,0.55)", backdropFilter: "blur(4px)", display: "grid", placeItems: "center", padding: 24 },
+  modal: { position: "relative", width: "100%", maxWidth: 420, background: "var(--surface)", color: "var(--ink)", borderRadius: "var(--radius)", border: "1px solid var(--line)", boxShadow: "var(--shadow-md)", padding: 28 },
+  modalClose: { position: "absolute", top: 12, right: 12, border: "none", background: "transparent", color: "var(--muted)", cursor: "pointer" },
+  modalIcon: { width: 48, height: 48, borderRadius: 14, display: "grid", placeItems: "center", background: "rgba(220,38,38,0.12)", color: "#dc2626" },
   inputIcon: { position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "var(--muted)" },
   link: { color: "var(--violet)", fontWeight: 600, textDecoration: "none" },
 };
