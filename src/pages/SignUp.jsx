@@ -2,15 +2,29 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Logo from "../components/Logo.jsx";
 import LoadingOverlay from "../components/LoadingOverlay.jsx";
+import ClaySelect from "../components/ClaySelect.jsx";
 import PasswordInput from "../components/PasswordInput.jsx";
 import { Floaties, Typewriter } from "../lib.jsx";
-import { ArrowRight, Building2, CheckCircle2, AlertTriangle, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, CheckCircle2, AlertTriangle, X } from "lucide-react";
 
 const SECTORS = ["Manufacturing", "Retail & Trade", "Services", "Agriculture", "Technology", "Construction", "Other"];
 const PROVINCES = [
   "Gauteng", "Western Cape", "KwaZulu-Natal", "Eastern Cape", "Free State",
   "Limpopo", "Mpumalanga", "North West", "Northern Cape",
 ];
+
+const COPY = {
+  smme: {
+    title: "Register your business and get investment-ready.",
+    lead: "Create your FoundrX account to unlock the document vault, your dual credit view, and a live funding-readiness score.",
+    points: ["Free to start — no card required", "Your data is encrypted and private", "Set up in under 5 minutes"],
+  },
+  partner: {
+    title: "Register your organisation and oversee your portfolio.",
+    lead: "Funder and incubator accounts are verified. Every action is logged, and access to founder data is strictly controlled.",
+    points: ["Organisation verified before access", "All portfolio activity is audit-logged", "Founder data shared by consent only"],
+  },
+};
 
 export default function SignUp({ onSignup }) {
   const navigate = useNavigate();
@@ -24,6 +38,8 @@ export default function SignUp({ onSignup }) {
     province: PROVINCES[0],
   });
 
+  const isFunder = role === "partner";
+  const copy = COPY[role];
   const [loading, setLoading] = useState(false);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -88,28 +104,32 @@ export default function SignUp({ onSignup }) {
         </div>
       )}
       {/* Brand panel — new colour template */}
-      <aside className="login-brand template-surface" style={{ position: "relative", overflow: "hidden", padding: "48px 56px", display: "flex", alignItems: "center" }}>
-        <Floaties />
+      <aside className={`login-brand template-surface${isFunder ? " funder-mode" : ""}`} style={{ position: "relative", overflow: "hidden", padding: "48px 56px", display: "flex", alignItems: "center" }}>
+        <Floaties tone={isFunder ? "danger" : "brand"} />
+        <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))} style={styles.backBtn}>
+          <ArrowLeft size={15} /> Back
+        </button>
         <div style={{ position: "relative", zIndex: 2, maxWidth: 460 }}>
           <Logo height={38} variant="light" />
-          <h1 style={{ fontSize: "2rem", lineHeight: 1.15, margin: "40px 0 16px", color: "#fff" }}>
+          {isFunder && (
+            <p className="funder-eyebrow auth-alert role-fade" style={{ margin: "32px 0 0", fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase" }}>
+              Authorised access only
+            </p>
+          )}
+          <h1 key={`h-${role}`} style={{ fontSize: "2rem", lineHeight: 1.15, margin: isFunder ? "12px 0 16px" : "40px 0 16px", color: "#fff" }}>
             <Typewriter
-              segments={[{ text: "Register your business and get investment-ready." }]}
-              ariaLabel="Register your business and get investment-ready."
+              key={role}
+              segments={[{ text: copy.title }]}
+              ariaLabel={copy.title}
             />
           </h1>
-          <p style={{ color: "rgba(255,255,255,0.8)", lineHeight: 1.6, margin: 0 }}>
-            Create your FoundrX account to unlock the document vault, your dual credit view, and a
-            live funding-readiness score.
+          <p key={`p-${role}`} className="funder-lead role-fade" style={{ color: "rgba(255,255,255,0.8)", lineHeight: 1.6, margin: 0 }}>
+            {copy.lead}
           </p>
           <ul style={{ listStyle: "none", padding: 0, margin: "32px 0 0", display: "grid", gap: 14 }}>
-            {[
-              "Free to start — no card required",
-              "Your data is encrypted and private",
-              "Set up in under 5 minutes",
-            ].map((t) => (
+            {copy.points.map((t) => (
               <li key={t} style={{ display: "flex", gap: 10, alignItems: "center", color: "rgba(255,255,255,0.9)" }}>
-                <CheckCircle2 size={18} color="#9d6bf5" /> {t}
+                <CheckCircle2 size={18} color={isFunder ? "#f87171" : "#9d6bf5"} /> {t}
               </li>
             ))}
           </ul>
@@ -128,7 +148,7 @@ export default function SignUp({ onSignup }) {
           <h2 style={{ textAlign: "center", fontSize: "1.5rem", marginBottom: 20 }}>Register your business</h2>
 
           {/* Account type */}
-          <div className="role-toggle" data-role={role}>
+          <div className={`role-toggle${isFunder ? " danger" : ""}`} data-role={role}>
             <button type="button" aria-pressed={role === "smme"} onClick={() => setRole("smme")}>
               I'm an SMME
             </button>
@@ -141,35 +161,31 @@ export default function SignUp({ onSignup }) {
             <Field key={`b-${role}`} fade label={role === "smme" ? "Business name" : "Organisation name"} error={errors.business}>
               <div style={{ position: "relative" }}>
                 <Building2 size={16} style={styles.inputIcon} />
-                <input value={form.business} onChange={set("business")} placeholder="e.g. Acme Trading (Pty) Ltd" style={{ ...styles.input, paddingLeft: 38, ...(errors.business ? styles.inputError : {}) }} />
+                <input value={form.business} onChange={set("business")} style={{ ...styles.input, paddingLeft: 38, ...(errors.business ? styles.inputError : {}) }} />
               </div>
             </Field>
             <Field label="Your full name" error={errors.name}>
-              <input value={form.name} onChange={set("name")} placeholder="Jane Dlamini" style={{ ...styles.input, ...(errors.name ? styles.inputError : {}) }} />
+              <input value={form.name} onChange={set("name")} style={{ ...styles.input, ...(errors.name ? styles.inputError : {}) }} />
             </Field>
             <Field label="Work email" error={errors.email}>
-              <input type="email" value={form.email} onChange={set("email")} placeholder="you@business.co.za" style={{ ...styles.input, ...(errors.email ? styles.inputError : {}) }} />
+              <input type="email" value={form.email} onChange={set("email")} style={{ ...styles.input, ...(errors.email ? styles.inputError : {}) }} />
             </Field>
             <Field label="Password" error={errors.password}>
-              <PasswordInput value={form.password} onChange={set("password")} placeholder="Create a password" style={{ ...styles.input, ...(errors.password ? styles.inputError : {}) }} />
+              <PasswordInput value={form.password} onChange={set("password")} style={{ ...styles.input, ...(errors.password ? styles.inputError : {}) }} />
             </Field>
 
             {role === "smme" && (
-              <div className="role-fade" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="role-fade" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, position: "relative", zIndex: 5 }}>
                 <Field label="Sector">
-                  <select value={form.sector} onChange={set("sector")} style={styles.input}>
-                    {SECTORS.map((s) => <option key={s}>{s}</option>)}
-                  </select>
+                  <ClaySelect ariaLabel="Sector" value={form.sector} options={SECTORS} onChange={(v) => setForm((f) => ({ ...f, sector: v }))} />
                 </Field>
                 <Field label="Province">
-                  <select value={form.province} onChange={set("province")} style={styles.input}>
-                    {PROVINCES.map((p) => <option key={p}>{p}</option>)}
-                  </select>
+                  <ClaySelect ariaLabel="Province" value={form.province} options={PROVINCES} onChange={(v) => setForm((f) => ({ ...f, province: v }))} />
                 </Field>
               </div>
             )}
 
-            <button type="submit" className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 8, opacity: loading ? 0.7 : 1, cursor: loading ? "wait" : "pointer" }} disabled={loading}>
+            <button type="submit" className={`btn btn-primary${isFunder ? " btn-danger" : ""}`} style={{ width: "100%", justifyContent: "center", marginTop: 8, opacity: loading ? 0.7 : 1, cursor: loading ? "wait" : "pointer" }} disabled={loading}>
               {loading ? "Please wait…" : (<>Create account &amp; open dashboard <ArrowRight size={18} /></>)}
             </button>
           </form>
@@ -198,6 +214,7 @@ function Field({ label, error, fade, children }) {
 }
 
 const styles = {
+  backBtn: { position: "absolute", top: 22, left: 22, zIndex: 4, display: "inline-flex", alignItems: "center", gap: 6, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.08)", backdropFilter: "blur(8px)", borderRadius: 999, padding: "8px 14px", fontSize: "0.82rem", fontWeight: 600, color: "#fff", cursor: "pointer" },
   input: { display: "block", width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid var(--line-strong)", fontSize: "0.95rem", fontFamily: "inherit", outline: "none", background: "var(--surface)", color: "var(--ink)" },
   inputError: { borderColor: "#dc2626", boxShadow: "0 0 0 3px rgba(220,38,38,0.12)" },
   scrim: { position: "fixed", inset: 0, zIndex: 1000, background: "rgba(15,10,30,0.55)", backdropFilter: "blur(4px)", display: "grid", placeItems: "center", padding: 24 },

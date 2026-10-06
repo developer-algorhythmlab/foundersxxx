@@ -63,14 +63,11 @@ export default function DashboardLayout({ user, onLogout }) {
               to={to}
               end={end}
               onClick={() => setOpen(false)}
-              className="dash-nav-item"
-              style={({ isActive }) => ({
-                ...styles.navItem,
-                ...(isActive ? styles.navItemActive : {}),
-              })}
+              className={({ isActive }) => `dash-nav-item${isActive ? " is-active" : ""}`}
+              style={styles.navItem}
             >
-              <Icon size={18} />
-              {label}
+              <span className="dash-nav-ico"><Icon size={18} /></span>
+              <span className="dash-nav-label">{label}</span>
             </NavLink>
           ))}
         </nav>
@@ -144,7 +141,6 @@ const styles = {
     textDecoration: "none",
     fontWeight: 600,
     fontSize: "0.9rem",
-    transition: "background 0.15s, color 0.15s",
   },
   navItemActive: { background: "var(--panel-tint)", color: "var(--violet-deep)" },
   sidebarFoot: { borderTop: "1px solid var(--line)", paddingTop: 14 },
@@ -190,7 +186,7 @@ const styles = {
     gap: 16,
     padding: "16px 24px",
     paddingRight: 76,
-    background: "rgba(255,255,255,0.85)",
+    background: "color-mix(in srgb, var(--surface) 85%, transparent)",
     backdropFilter: "blur(8px)",
     borderBottom: "1px solid var(--line)",
     position: "sticky",
